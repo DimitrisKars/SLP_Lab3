@@ -1,6 +1,6 @@
 from torch.utils.data import Dataset
 from tqdm import tqdm
-
+import re
 
 class SentenceDataset(Dataset):
     """
@@ -31,12 +31,32 @@ class SentenceDataset(Dataset):
             word2idx (dict): a dictionary which maps words to indexes
         """
 
-        # self.data = X
-        # self.labels = y
-        # self.word2idx = word2idx
+        self.data = [self.preprocess(sentence, word2idx) for sentence in tqdm(X, desc="Preprocessing data")]
+        self.labels = y
+        self.word2idx = word2idx
 
-        # EX2
-        raise NotImplementedError
+
+    def preprocess(self, sentence, word2idx):
+        """
+        Preprocess a single data point - turn a sentence into a sequence
+        of word indexes. This could involve tokenizing the sentence, lowercasing,
+        perhaps removing punctuation, and finally mapping words to indexes using
+        the provided word2idx dictionary.
+
+        Args:
+            sentence (str): a sentence string
+            word2idx (dict): a dictionary mapping words to indexes
+
+        Returns:
+            list: a list of word indexes representing the sentence
+        """
+
+        words = re.sub(r'[^\w\s]', '', sentence)
+        words = words.split()
+
+
+        # map words to indexes
+        return [word2idx[word] for word in words if word in word2idx]
 
     def __len__(self):
         """
