@@ -38,21 +38,22 @@ class BaselineDNN(nn.Module):
 
         # 1 - define the embedding layer
         # EX4
-        self.embedding_layer = nn.Embedding(vocab_size, embedding_dim)
+        # self.embedding_layer = nn.Embedding(vocab_size, embedding_dim)
        
 
-        self.layers = nn.ModuleList([
-            self.embedding_layer,
-            nn.ReLU(),
-            nn.Linear(embedding_dim, n_classes)
-        ])
+      
 
         # 2 - initialize the weights of our Embedding layer
         # from the pretrained word embeddings
         # Create an embedding layer and initialize weights from pretrained embeddings
         # EX4
         # 3 - define if the embedding layer will be frozen or finetuned
-        embedding_layer = nn.Embedding.from_pretrained(pretrained_embeddings, freeze=True)  # EX4
+        self.embedding_layer = nn.Embedding.from_pretrained(pretrained_embeddings, freeze=True)  # EX4
+        self.layers = nn.ModuleList([
+            self.embedding_layer,
+            nn.ReLU(),
+            nn.Linear(embedding_dim, n_classes)
+        ])
 
         # 4 - define a non-linear transformation of the representations
         # EX5
@@ -64,22 +65,30 @@ class BaselineDNN(nn.Module):
     def forward(self, x, lengths):
         """
         This is the heart of the model.
-        This function, defines how the data passes through the network.
+        This function defines how the data passes through the network.
 
         Returns: the logits for each class
-
         """
 
         # 1 - embed the words, using the embedding layer
-        embeddings = ...  # EX6
+        embeddings = self.embedding_layer(x)
 
-        # 2 - construct a sentence representation out of the word embeddings
-        representations = ...  # EX6
-
+       # 2 - construct a sentence representation out of the word embeddings
+        representation_list=[]
+        for i, length in enumerate(lengths):
+            non_padded_embeddings = embeddings[i, :length, :]
+            representation_example = non_padded_embeddings.mean(dim=0)
+            representation_list.append(representation_example)
+        
+        
+        representations=torch.stack(representation_list)
+        #print(representations)
+        
         # 3 - transform the representations to new ones.
-        representations = ...  # EX6
+        for layer in self.layers[1:]:
+            representations = layer(representations)
 
         # 4 - project the representations to classes using a linear layer
-        logits = ...  # EX6
+        logits = representations
 
         return logits

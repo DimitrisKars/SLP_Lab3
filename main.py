@@ -4,7 +4,7 @@ import warnings
 from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.preprocessing import LabelEncoder
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader,TensorDataset
 
 from config import EMB_PATH
 from dataloading import SentenceDataset
@@ -12,6 +12,8 @@ from models import BaselineDNN
 from training import train_dataset, eval_dataset
 from utils.load_datasets import load_MR, load_Semeval2017A
 from utils.load_embeddings import load_word_vectors
+import torch.optim as optim
+from torch import nn
 
 warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 
@@ -31,7 +33,7 @@ EMB_DIM = 100
 
 EMB_TRAINABLE = False
 BATCH_SIZE = 128
-EPOCHS = 50
+EPOCHS = 10
 DATASET = "Semeval2017A"  # options: "MR", "Semeval2017A"
 
 # if your computer has a CUDA compatible gpu use it, otherwise use the cpu
@@ -66,9 +68,17 @@ test_set = SentenceDataset(X_test, y_test, word2idx)
 
 for i in range(5):
     print(train_set[i])
+    
+# X_train = torch.tensor(X_train)
+# y_train = torch.tensor(y_train)
+# X_test = torch.tensor(X_test)
+# y_test = torch.tensor(y_test)
+
 # EX7 - Define our PyTorch-based DataLoader
-train_loader = ...  # EX7
-test_loader = ...  # EX7
+# dataset_train = TensorDataset(X_train, y_train)
+# dataset_test = TensorDataset(X_test, y_test)
+train_loader = DataLoader(train_set, shuffle=True, batch_size=BATCH_SIZE)  # EX7
+test_loader = DataLoader(test_set, shuffle=True, batch_size=BATCH_SIZE)  # EX7
 
 #############################################################################
 # Model Definition (Model, Loss Function, Optimizer)
@@ -82,9 +92,14 @@ model.to(DEVICE)
 print(model)
 
 # We optimize ONLY those parameters that are trainable (p.requires_grad==True)
-criterion = ...  # EX8
-parameters = ...  # EX8
-optimizer = ...  # EX8
+criterion = nn.CrossEntropyLoss()  # EX8
+
+parameters = []  # EX8
+for p in model.parameters():
+    if p.requires_grad:
+        parameters.append(p)
+        
+optimizer = optim.Adam(model.parameters(), lr=0.05)  # EX8
 
 #############################################################################
 # Training Pipeline

@@ -31,7 +31,7 @@ class SentenceDataset(Dataset):
             y (list): List of training labels
             word2idx (dict): a dictionary which maps words to indexes
         """
-        self.max = 0
+        self.max = 64
         self.data = [self.preprocess(sentence, word2idx) for sentence in tqdm(X, desc="Preprocessing data")]
         self.target= y
         self.word2idx = word2idx
@@ -56,9 +56,6 @@ class SentenceDataset(Dataset):
         #words = re.sub(r'[^\w\s]', '', sentence)
         
         words = words.split()
-
-        if (len(words) > self.max):
-            self.max = len(words)
 
         # map words to indexes
 
@@ -104,8 +101,11 @@ class SentenceDataset(Dataset):
         # EX3
 
         example = self.data[index]
-        length = len(self.data[index])
-        self.data[index] = np.pad(self.target[index], (0, self.max - len(self.data[index])), mode='constant')
+        length = len(example)
+        if length < self.max:
+            example = np.pad(example, (0, self.max - len(example)), mode='constant')
+        else:
+            example=example[0:self.max]
         label = self.target[index]
 
 
