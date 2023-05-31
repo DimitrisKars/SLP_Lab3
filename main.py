@@ -32,7 +32,7 @@ EMB_DIM = 100
 EMB_TRAINABLE = False
 BATCH_SIZE = 128
 EPOCHS = 50
-DATASET = "MR"  # options: "MR", "Semeval2017A"
+DATASET = "Semeval2017A"  # options: "MR", "Semeval2017A"
 
 # if your computer has a CUDA compatible gpu use it, otherwise use the cpu
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -44,6 +44,7 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # load word embeddings
 print("loading word embeddings...")
 word2idx, idx2word, embeddings = load_word_vectors(EMBEDDINGS, EMB_DIM)
+vocab_size = len(word2idx.keys())
 
 # load the raw data
 if DATASET == "Semeval2017A":
@@ -63,6 +64,8 @@ n_classes = len(le.classes_) # EX1 - LabelEncoder.classes_.size
 train_set = SentenceDataset(X_train, y_train, word2idx)
 test_set = SentenceDataset(X_test, y_test, word2idx)
 
+for i in range(5):
+    print(train_set[i])
 # EX7 - Define our PyTorch-based DataLoader
 train_loader = ...  # EX7
 test_loader = ...  # EX7
@@ -70,7 +73,7 @@ test_loader = ...  # EX7
 #############################################################################
 # Model Definition (Model, Loss Function, Optimizer)
 #############################################################################
-model = BaselineDNN(output_size=...,  # EX8
+model = BaselineDNN(output_size=n_classes,  # EX8
                     embeddings=embeddings,
                     trainable_emb=EMB_TRAINABLE)
 

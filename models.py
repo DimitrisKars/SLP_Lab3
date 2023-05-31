@@ -1,7 +1,9 @@
 import torch
 
 from torch import nn
-
+# from __main__ import vocab_size, EMB_DIM, n_classes
+EMB_DIM = 100
+n_classes = 3
 
 class BaselineDNN(nn.Module):
     """
@@ -23,23 +25,41 @@ class BaselineDNN(nn.Module):
         """
 
         super(BaselineDNN, self).__init__()
+        self.output_size = output_size
+        self.embeddings = embeddings
+        self.trainable_emb = trainable_emb
+        self.hidden_dim = 50
+
+        pretrained_embeddings = torch.tensor(embeddings)
+        embedding_dim = pretrained_embeddings.size(1)
+        vocab_size = pretrained_embeddings.size(0)
+
+
 
         # 1 - define the embedding layer
-        ...  # EX4
+        # EX4
+        self.embedding_layer = nn.Embedding(vocab_size, embedding_dim)
+       
+
+        self.layers = nn.ModuleList([
+            self.embedding_layer,
+            nn.ReLU(),
+            nn.Linear(embedding_dim, n_classes)
+        ])
 
         # 2 - initialize the weights of our Embedding layer
         # from the pretrained word embeddings
-        ...  # EX4
-
+        # Create an embedding layer and initialize weights from pretrained embeddings
+        # EX4
         # 3 - define if the embedding layer will be frozen or finetuned
-        ...  # EX4
+        embedding_layer = nn.Embedding.from_pretrained(pretrained_embeddings, freeze=True)  # EX4
 
         # 4 - define a non-linear transformation of the representations
-        ...  # EX5
+        # EX5
 
         # 5 - define the final Linear layer which maps
         # the representations to the classes
-        ...  # EX5
+        # EX5
 
     def forward(self, x, lengths):
         """

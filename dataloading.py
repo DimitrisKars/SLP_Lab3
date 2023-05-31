@@ -1,6 +1,7 @@
 from torch.utils.data import Dataset
 from tqdm import tqdm
 import re
+import numpy as np
 
 class SentenceDataset(Dataset):
     """
@@ -30,10 +31,11 @@ class SentenceDataset(Dataset):
             y (list): List of training labels
             word2idx (dict): a dictionary which maps words to indexes
         """
-
+        self.max = 0
         self.data = [self.preprocess(sentence, word2idx) for sentence in tqdm(X, desc="Preprocessing data")]
-        self.labels = y
+        self.target= y
         self.word2idx = word2idx
+        # self.target
 
 
     def preprocess(self, sentence, word2idx):
@@ -50,13 +52,17 @@ class SentenceDataset(Dataset):
         Returns:
             list: a list of word indexes representing the sentence
         """
-
-        words = re.sub(r'[^\w\s]', '', sentence)
+        words = re.sub(r'[^\w\s-]|_', '', sentence).lower()
+        #words = re.sub(r'[^\w\s]', '', sentence)
+        
         words = words.split()
 
+        if (len(words) > self.max):
+            self.max = len(words)
 
         # map words to indexes
-        return [word2idx[word] for word in words if word in word2idx]
+
+        return [word2idx[word] if word in word2idx else word2idx["<unk>"] for word in words]
 
     def __len__(self):
         """
@@ -97,6 +103,12 @@ class SentenceDataset(Dataset):
 
         # EX3
 
-        # return example, label, length
-        raise NotImplementedError
+        example = self.data[index]
+        length = len(self.data[index])
+        self.data[index] = np.pad(self.target[index], (0, self.max - len(self.data[index])), mode='constant')
+        label = self.target[index]
+
+
+        return example, label, length
+        #raise NotImplementedError
 
