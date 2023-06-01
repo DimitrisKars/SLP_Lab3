@@ -3,7 +3,7 @@ import torch
 from torch import nn
 # from main import EMB_DIM, n_classes
 # from __main__ import vocab_size, EMB_DIM, n_classes
-EMB_DIM = 100
+EMB_DIM = 50
 n_classes = 3
 
 class BaselineDNN(nn.Module):
@@ -29,18 +29,25 @@ class BaselineDNN(nn.Module):
         self.output_size = output_size
         self.embeddings = embeddings
         self.trainable_emb = trainable_emb
-        self.hidden_dim = 50
+        #self.hidden_dim = 50
 
-        pretrained_embeddings = torch.tensor(embeddings)
-        embedding_dim = pretrained_embeddings.size(1)
-        vocab_size = pretrained_embeddings.size(0)
+        num_embeddings, embedding_dim = embeddings.shape
+        self.embedding_layer = nn.Embedding(num_embeddings, embedding_dim)  # EX4
+        self.embedding_layer.weight.data.copy_(torch.from_numpy(embeddings))  # EX4
+        self.embedding_layer.weight.requires_grad = trainable_emb  # EX4
+        # 2 - initialize the weights of our Embedding layer
+        # from the pretrained word embeddings
+    #     self.embedding_layer.weight.data.copy_(torch.from_numpy(embeddings))
+    # pretrained_embeddings = torch.tensor(embeddings)
+    #     embedding_dim = pretrained_embeddings.size(1)
+    #     vocab_size = pretrained_embeddings.size(0)
 
 
 
         # 1 - define the embedding layer
         # EX4
         # self.embedding_layer = nn.Embedding(vocab_size, embedding_dim)
-       
+
 
       
 
@@ -49,9 +56,12 @@ class BaselineDNN(nn.Module):
         # Create an embedding layer and initialize weights from pretrained embeddings
         # EX4
         # 3 - define if the embedding layer will be frozen or finetuned
-        self.embedding_layer = nn.Embedding.from_pretrained(pretrained_embeddings, freeze=False)  # EX4
+        # self.embedding_layer = nn.Embedding.from_pretrained(pretrained_embeddings)  # EX4
+        # self.embedding_layer.requires_grad = trainable_emb
+        #self.embedding_layer = nn.Embedding.from_pretrained(pretrained_embeddings, freeze=True)  # EX4
         self.layers = nn.ModuleList([
             self.embedding_layer,
+            nn.Linear(embedding_dim, embedding_dim),
             nn.ReLU(),
             nn.Linear(embedding_dim, n_classes)
         ])

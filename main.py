@@ -29,10 +29,10 @@ warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 # for example http://nlp.stanford.edu/data/glove.6B.zip
 
 # 1 - point to the pretrained embeddings file (must be in /embeddings folder)
-EMBEDDINGS = os.path.join(EMB_PATH, "glove.twitter.27B.100d.txt")
+EMBEDDINGS = os.path.join(EMB_PATH, "glove.twitter.27B.50d.txt")
 
 # 2 - set the correct dimensionality of the embeddings
-EMB_DIM = 100
+EMB_DIM = 50
 
 EMB_TRAINABLE = False
 BATCH_SIZE = 128
@@ -81,7 +81,7 @@ for i in range(5):
 # dataset_train = TensorDataset(X_train, y_train)
 # dataset_test = TensorDataset(X_test, y_test)
 train_loader = DataLoader(train_set, shuffle=True, batch_size=BATCH_SIZE)  # EX7
-test_loader = DataLoader(test_set, shuffle=True, batch_size=BATCH_SIZE)  # EX7
+test_loader = DataLoader(test_set, batch_size=BATCH_SIZE)  # EX7
 
 #############################################################################
 # Model Definition (Model, Loss Function, Optimizer)
@@ -102,7 +102,7 @@ for p in model.parameters():
     if p.requires_grad:
         parameters.append(p)
         
-optimizer = optim.Adam(model.parameters(), lr=0.05)  # EX8
+optimizer = optim.Adam(model.parameters(), lr=0.001)  # EX8
 
 #############################################################################
 # Training Pipeline

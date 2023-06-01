@@ -38,9 +38,9 @@ def train_dataset(_epoch, dataloader, model, loss_function, optimizer):
         inputs, labels, lengths = batch
 
         # move the batch tensors to the right device
-        inputs.to(device)
-        labels.to(device)
-        lengths.to(device)# EX9
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+        lengths = lengths.to(device) # EX9
 
         # Step 1 - zero the gradients
         # Remember that PyTorch accumulates gradients.
@@ -54,7 +54,7 @@ def train_dataset(_epoch, dataloader, model, loss_function, optimizer):
         loss = loss_function(outputs,labels)  # EX9
 
         # Step 4 - backward pass: compute gradient wrt model parameters
-        loss.backward() # EX9
+        loss.backward()  # EX9
 
         # Step 5 - update weights
         optimizer.step()  # EX9
@@ -91,14 +91,14 @@ def eval_dataset(dataloader, model, loss_function):
             inputs, labels, lengths = batch
 
             # move the batch tensors to the right device
-            inputs.to(device)
-            labels.to(device)
-            lengths.to(device)# EX9
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            lengths = lengths.to(device) # EX9
 
             # Step 1 - zero the gradients
             # Remember that PyTorch accumulates gradients.
             # We need to clear them out before each batch!
-            model.zero_grad()  # EX9
+            #model.zero_grad()  # EX9
 
             # Step 2 - forward pass: y' = model(x)
             outputs = model(inputs,lengths)  # EX9
@@ -109,7 +109,8 @@ def eval_dataset(dataloader, model, loss_function):
 
             # Step 4 - make predictions (class = argmax of posteriors)
 
-            predictions=torch.argmax(outputs, dim=1) # EX9
+            _, predictions = torch.max(outputs, 1)
+            #predictions=torch.argmax(outputs, dim=1) # EX9
 
             # Step 5 - collect the predictions, gold labels and batch loss
               # EX9
