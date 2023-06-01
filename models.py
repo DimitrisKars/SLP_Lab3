@@ -1,6 +1,7 @@
 import torch
 
 from torch import nn
+# from main import EMB_DIM, n_classes
 # from __main__ import vocab_size, EMB_DIM, n_classes
 EMB_DIM = 100
 n_classes = 3
@@ -48,7 +49,7 @@ class BaselineDNN(nn.Module):
         # Create an embedding layer and initialize weights from pretrained embeddings
         # EX4
         # 3 - define if the embedding layer will be frozen or finetuned
-        self.embedding_layer = nn.Embedding.from_pretrained(pretrained_embeddings, freeze=True)  # EX4
+        self.embedding_layer = nn.Embedding.from_pretrained(pretrained_embeddings, freeze=False)  # EX4
         self.layers = nn.ModuleList([
             self.embedding_layer,
             nn.ReLU(),

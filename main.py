@@ -3,6 +3,7 @@ import warnings
 
 from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score, recall_score, f1_score
 import torch
 from torch.utils.data import DataLoader,TensorDataset
 
@@ -14,6 +15,8 @@ from utils.load_datasets import load_MR, load_Semeval2017A
 from utils.load_embeddings import load_word_vectors
 import torch.optim as optim
 from torch import nn
+
+import matplotlib.pyplot as plt
 
 warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 
@@ -33,7 +36,7 @@ EMB_DIM = 100
 
 EMB_TRAINABLE = False
 BATCH_SIZE = 128
-EPOCHS = 10
+EPOCHS = 50
 DATASET = "Semeval2017A"  # options: "MR", "Semeval2017A"
 
 # if your computer has a CUDA compatible gpu use it, otherwise use the cpu
@@ -104,15 +107,66 @@ optimizer = optim.Adam(model.parameters(), lr=0.05)  # EX8
 #############################################################################
 # Training Pipeline
 #############################################################################
+total_train_loss = []
+total_test_loss = []
 for epoch in range(1, EPOCHS + 1):
     # train the model for one epoch
     train_dataset(epoch, train_loader, model, criterion, optimizer)
 
     # evaluate the performance of the model, on both data sets
-    train_loss, (y_train_gold, y_train_pred) = eval_dataset(train_loader,
+    train_loss, (y_train_pred, y_train_gold) = eval_dataset(train_loader,
                                                             model,
                                                             criterion)
 
-    test_loss, (y_test_gold, y_test_pred) = eval_dataset(test_loader,
+    total_train_loss.append(train_loss)
+
+    test_loss, (y_test_pred, y_test_gold) = eval_dataset(test_loader,
                                                          model,
                                                          criterion)
+
+    total_test_loss.append(test_loss)
+
+accuracy_train = 0
+f1_score_train = 0
+recall_score_train = 0
+for true, pred in zip(y_train_gold, y_train_pred):
+    accuracy_train += accuracy_score(true, pred)
+    f1_score_train += f1_score(true, pred, average="macro")
+    recall_score_train += recall_score(true, pred, average="macro")
+
+accuracy_train /= len(y_train_gold)
+f1_score_train /= len(y_train_gold)
+recall_score_train /= len(y_train_gold)
+
+print("Accuracy score for train set:", accuracy_train)
+print("F1-score for train set:", f1_score_train)
+print("Recall score for train set:", recall_score_train)
+
+accuracy_test = 0
+f1_score_test = 0
+recall_score_test = 0
+for true, pred in zip(y_test_gold, y_test_pred):
+    accuracy_test += accuracy_score(true, pred)
+    f1_score_test += f1_score(true, pred, average="macro")
+    recall_score_test += recall_score(true, pred, average="macro")
+
+accuracy_test /= len(y_test_gold)
+f1_score_test /= len(y_test_gold)
+recall_score_test /= len(y_test_gold)
+
+print("Accuracy score for test set:", accuracy_test)
+print("F1-score for test set:", f1_score_test)
+print("Recall score for test set:", recall_score_test)
+
+
+plt.figure()
+plt.xlabel("Epoch")
+plt.title("Train loss")
+plt.plot(total_train_loss)
+plt.savefig("train_loss.svg", format='svg')
+
+plt.figure()
+plt.xlabel("Epoch")
+plt.title("Test loss")
+plt.plot(total_test_loss)
+plt.savefig("test_loss.svg", format='svg')

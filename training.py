@@ -108,11 +108,13 @@ def eval_dataset(dataloader, model, loss_function):
 
 
             # Step 4 - make predictions (class = argmax of posteriors)
-            y_pred=torch.argmax(outputs) # EX9
+
+            predictions=torch.argmax(outputs, dim=1) # EX9
 
             # Step 5 - collect the predictions, gold labels and batch loss
               # EX9
-
+            y_pred.append(predictions)
+            y.append(labels)
             running_loss += loss.data.item()
 
     return running_loss / index, (y_pred, y)
