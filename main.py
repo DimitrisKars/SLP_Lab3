@@ -15,7 +15,8 @@ from utils.load_datasets import load_MR, load_Semeval2017A
 from utils.load_embeddings import load_word_vectors
 import torch.optim as optim
 from torch import nn
-
+from training import get_metrics_report 
+import numpy as np
 import matplotlib.pyplot as plt
 
 warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
@@ -127,37 +128,37 @@ for epoch in range(1, EPOCHS + 1):
 
     total_test_loss.append(test_loss)
 
-accuracy_train = 0
-f1_score_train = 0
-recall_score_train = 0
-for true, pred in zip(y_train_gold, y_train_pred):
-    accuracy_train += accuracy_score(true, pred)
-    f1_score_train += f1_score(true, pred, average="macro")
-    recall_score_train += recall_score(true, pred, average="macro")
+#accuracy_train = 0
+#f1_score_train = 0
+#recall_score_train = 0
+#for true, pred in zip(y_train_gold, y_train_pred):
+#    accuracy_train += accuracy_score(true, pred)
+#    f1_score_train += f1_score(true, pred, average="macro")
+#    recall_score_train += recall_score(true, pred, average="macro")
 
-accuracy_train /= len(y_train_gold)
-f1_score_train /= len(y_train_gold)
-recall_score_train /= len(y_train_gold)
+#accuracy_train /= len(y_train_gold)
+#f1_score_train /= len(y_train_gold)
+#recall_score_train /= len(y_train_gold)
 
-print("Accuracy score for train set:", accuracy_train)
-print("F1-score for train set:", f1_score_train)
-print("Recall score for train set:", recall_score_train)
+print("Scores for train set:\n", get_metrics_report(y_train_pred,y_train_gold))
+#print("F1-score for train set:", f1_score_train)
+#print("Recall score for train set:", recall_score_train)
 
-accuracy_test = 0
-f1_score_test = 0
-recall_score_test = 0
-for true, pred in zip(y_test_gold, y_test_pred):
-    accuracy_test += accuracy_score(true, pred)
-    f1_score_test += f1_score(true, pred, average="macro")
-    recall_score_test += recall_score(true, pred, average="macro")
+#accuracy_test = 0
+#f1_score_test = 0
+#recall_score_test = 0
+#for true, pred in zip(y_test_gold, y_test_pred):
+#    accuracy_test += accuracy_score(true, pred)
+#    f1_score_test += f1_score(true, pred, average="macro")
+#    recall_score_test += recall_score(true, pred, average="macro")
 
-accuracy_test /= len(y_test_gold)
-f1_score_test /= len(y_test_gold)
-recall_score_test /= len(y_test_gold)
+#accuracy_test /= len(y_test_gold)
+#f1_score_test /= len(y_test_gold)
+#recall_score_test /= len(y_test_gold)
 
-print("Accuracy score for test set:", accuracy_test)
-print("F1-score for test set:", f1_score_test)
-print("Recall score for test set:", recall_score_test)
+print("Scores for test set:\n", get_metrics_report(y_test_pred,y_test_gold))
+#print("F1-score for test set:", f1_score_test)
+#print("Recall score for test set:", recall_score_test)
 
 
 plt.figure()
