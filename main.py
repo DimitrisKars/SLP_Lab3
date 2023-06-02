@@ -29,10 +29,10 @@ warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 # for example http://nlp.stanford.edu/data/glove.6B.zip
 
 # 1 - point to the pretrained embeddings file (must be in /embeddings folder)
-EMBEDDINGS = os.path.join(EMB_PATH, "glove.twitter.27B.50d.txt")
+EMBEDDINGS = os.path.join(EMB_PATH, "glove.twitter.27B.100d.txt")
 
 # 2 - set the correct dimensionality of the embeddings
-EMB_DIM = 50
+EMB_DIM = 100
 
 EMB_TRAINABLE = False
 BATCH_SIZE = 128
@@ -61,8 +61,9 @@ else:
 
 # convert data labels from strings to integers
 le = LabelEncoder()
-y_train = le.fit_transform(y_train)  # EX1
-y_test = le.fit_transform(y_test)  # EX1
+le.fit(y_train)
+y_train = le.transform(y_train)  # EX1
+y_test = le.transform(y_test)  # EX1
 n_classes = len(le.classes_) # EX1 - LabelEncoder.classes_.size
 
 # Define our PyTorch-based Dataset
@@ -102,7 +103,7 @@ for p in model.parameters():
     if p.requires_grad:
         parameters.append(p)
         
-optimizer = optim.Adam(model.parameters(), lr=0.001)  # EX8
+optimizer = optim.Adam(parameters, lr=0.0001)  # EX8
 
 #############################################################################
 # Training Pipeline

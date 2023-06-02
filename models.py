@@ -3,7 +3,7 @@ import torch
 from torch import nn
 # from main import EMB_DIM, n_classes
 # from __main__ import vocab_size, EMB_DIM, n_classes
-EMB_DIM = 50
+EMB_DIM = 100
 n_classes = 3
 
 class BaselineDNN(nn.Module):
@@ -61,7 +61,7 @@ class BaselineDNN(nn.Module):
         #self.embedding_layer = nn.Embedding.from_pretrained(pretrained_embeddings, freeze=True)  # EX4
         self.layers = nn.ModuleList([
             self.embedding_layer,
-            nn.Linear(embedding_dim, embedding_dim),
+            #nn.Linear(embedding_dim, embedding_dim),
             nn.ReLU(),
             nn.Linear(embedding_dim, n_classes)
         ])
