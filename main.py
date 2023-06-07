@@ -40,7 +40,7 @@ EMB_DIM = 100
 
 EMB_TRAINABLE = False
 BATCH_SIZE = 128
-EPOCHS = 50
+EPOCHS = 3
 DATASET = "Semeval2017A"  # options: "MR", "Semeval2017A"
 
 # if your computer has a CUDA compatible gpu use it, otherwise use the cpu
@@ -132,15 +132,15 @@ for epoch in range(1, EPOCHS + 1):
 
     total_train_loss.append(train_loss)
 
-    # test_loss, (y_test_pred, y_test_gold) = eval_dataset(test_loader,
-    #                                                      model,
-    #                                                      criterion)
+    test_loss, (y_test_pred, y_test_gold) = eval_dataset(test_loader,
+                                                          model,
+                                                          criterion)
 
     valid_loss, (y_valid_pred, y_valid_gold) = eval_dataset(test_loader,
                                                             model,
                                                             criterion)
 
-    # total_test_loss.append(test_loss)
+    total_test_loss.append(test_loss)
     total_valid_loss.append(valid_loss)
 
     print(f"\n===== EPOCH {epoch} ========")
