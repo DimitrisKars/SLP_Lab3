@@ -15,9 +15,12 @@ from utils.load_datasets import load_MR, load_Semeval2017A
 from utils.load_embeddings import load_word_vectors
 import torch.optim as optim
 from torch import nn
-from training import get_metrics_report 
-import numpy as np
+
 import matplotlib.pyplot as plt
+
+
+from training import torch_train_val_split, get_metrics_report
+from early_stopper import EarlyStopper
 
 warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 
@@ -82,7 +85,8 @@ for i in range(5):
 # EX7 - Define our PyTorch-based DataLoader
 # dataset_train = TensorDataset(X_train, y_train)
 # dataset_test = TensorDataset(X_test, y_test)
-train_loader = DataLoader(train_set, shuffle=True, batch_size=BATCH_SIZE)  # EX7
+train_loader, val_loader = torch_train_val_split(train_set, BATCH_SIZE, BATCH_SIZE)
+# train_loader = DataLoader(train_set, shuffle=True, batch_size=BATCH_SIZE)  # EX7
 test_loader = DataLoader(test_set, batch_size=BATCH_SIZE)  # EX7
 
 #############################################################################
@@ -109,8 +113,14 @@ optimizer = optim.Adam(parameters, lr=0.0001)  # EX8
 #############################################################################
 # Training Pipeline
 #############################################################################
+
+save_path = f'{DATASET}_{model.__class__.__name__}.pth'
+early_stopper = EarlyStopper(model, save_path, patience=5)
+
+
 total_train_loss = []
 total_test_loss = []
+total_valid_loss = []
 for epoch in range(1, EPOCHS + 1):
     # train the model for one epoch
     train_dataset(epoch, train_loader, model, criterion, optimizer)
@@ -122,43 +132,58 @@ for epoch in range(1, EPOCHS + 1):
 
     total_train_loss.append(train_loss)
 
-    test_loss, (y_test_pred, y_test_gold) = eval_dataset(test_loader,
-                                                         model,
-                                                         criterion)
+    # test_loss, (y_test_pred, y_test_gold) = eval_dataset(test_loader,
+    #                                                      model,
+    #                                                      criterion)
 
-    total_test_loss.append(test_loss)
+    valid_loss, (y_valid_pred, y_valid_gold) = eval_dataset(test_loader,
+                                                            model,
+                                                            criterion)
 
-#accuracy_train = 0
-#f1_score_train = 0
-#recall_score_train = 0
-#for true, pred in zip(y_train_gold, y_train_pred):
-#    accuracy_train += accuracy_score(true, pred)
-#    f1_score_train += f1_score(true, pred, average="macro")
-#    recall_score_train += recall_score(true, pred, average="macro")
+    # total_test_loss.append(test_loss)
+    total_valid_loss.append(valid_loss)
 
-#accuracy_train /= len(y_train_gold)
-#f1_score_train /= len(y_train_gold)
-#recall_score_train /= len(y_train_gold)
+    print(f"\n===== EPOCH {epoch} ========")
+    print(f'\nTraining set\n{get_metrics_report(y_train_gold, y_train_pred)}')
+    print(f'\nValidation set\n{get_metrics_report(y_valid_gold, y_valid_pred)}')
 
-print("Scores for train set:\n", get_metrics_report(y_train_pred,y_train_gold))
-#print("F1-score for train set:", f1_score_train)
-#print("Recall score for train set:", recall_score_train)
+    if early_stopper.early_stop(valid_loss):
+        print('Early Stopping was activated.')
+        print(f'Epoch {epoch}/{EPOCHS}, Loss at training set: {train_loss}\n\tLoss at validation set: {valid_loss}')
+        print('Training has been completed.\n')
+        break
 
-#accuracy_test = 0
-#f1_score_test = 0
-#recall_score_test = 0
-#for true, pred in zip(y_test_gold, y_test_pred):
-#    accuracy_test += accuracy_score(true, pred)
-#    f1_score_test += f1_score(true, pred, average="macro")
-#    recall_score_test += recall_score(true, pred, average="macro")
-
-#accuracy_test /= len(y_test_gold)
-#f1_score_test /= len(y_test_gold)
-#recall_score_test /= len(y_test_gold)
-
-print("Scores for test set:\n", get_metrics_report(y_test_pred,y_test_gold))
-#print("F1-score for test set:", f1_score_test)
-#print("Recall score for test set:", recall_score_test)
+# accuracy_train = 0
+# f1_score_train = 0
+# recall_score_train = 0
+# for true, pred in zip(y_train_gold, y_train_pred):
+#     accuracy_train += accuracy_score(true, pred)
+#     f1_score_train += f1_score(true, pred, average="macro")
+#     recall_score_train += recall_score(true, pred, average="macro")
+#
+# accuracy_train /= len(y_train_gold)
+# f1_score_train /= len(y_train_gold)
+# recall_score_train /= len(y_train_gold)
+#
+# print("Accuracy score for train set:", accuracy_train)
+# print("F1-score for train set:", f1_score_train)
+# print("Recall score for train set:", recall_score_train)
+#
+# accuracy_test = 0
+# f1_score_test = 0
+# recall_score_test = 0
+# for true, pred in zip(y_test_gold, y_test_pred):
+#     accuracy_test += accuracy_score(true, pred)
+#     f1_score_test += f1_score(true, pred, average="macro")
+#     recall_score_test += recall_score(true, pred, average="macro")
+#
+# accuracy_test /= len(y_test_gold)
+# f1_score_test /= len(y_test_gold)
+# recall_score_test /= len(y_test_gold)
+#
+# print("Accuracy score for test set:", accuracy_test)
+# print("F1-score for test set:", f1_score_test)
+# print("Recall score for test set:", recall_score_test)
 
 
 plt.figure()

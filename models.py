@@ -1,5 +1,5 @@
 import torch
-
+import numpy as np
 from torch import nn
 # from main import EMB_DIM, n_classes
 # from __main__ import vocab_size, EMB_DIM, n_classes
@@ -103,7 +103,8 @@ class BaselineDNN(nn.Module):
         logits = representations
 
         return logits
-        
+
+
 class LSTM(nn.Module):
     def __init__(self, output_size, embeddings, trainable_emb=False, bidirectional=False):
 
