@@ -3,6 +3,7 @@ import numpy as np
 from torch import nn
 # from main import EMB_DIM, n_classes
 # from __main__ import vocab_size, EMB_DIM, n_classes
+#Double in mean-max pooling than 100
 EMB_DIM = 100
 n_classes = 3
 
@@ -32,8 +33,8 @@ class BaselineDNN(nn.Module):
         #self.hidden_dim = 50
 
         num_embeddings, embedding_dim = embeddings.shape
-        self.embedding_layer = nn.Embedding(num_embeddings, embedding_dim)  # EX4
-        self.embedding_layer.weight.data.copy_(torch.from_numpy(embeddings))  # EX4
+        self.embedding_layer = nn.Embedding(num_embeddings,embedding_dim)  # EX4
+        self.embedding_layer.weight.data.copy_(torch.from_numpy(embeddings))  # Change for mean-only pooling  # EX4
         self.embedding_layer.weight.requires_grad = trainable_emb  # EX4
         # 2 - initialize the weights of our Embedding layer
         # from the pretrained word embeddings
@@ -61,7 +62,7 @@ class BaselineDNN(nn.Module):
         #self.embedding_layer = nn.Embedding.from_pretrained(pretrained_embeddings, freeze=True)  # EX4
         self.layers = nn.ModuleList([
             self.embedding_layer,
-            #nn.Linear(embedding_dim, embedding_dim),
+            nn.Linear(2*embedding_dim, embedding_dim),
             nn.ReLU(),
             nn.Linear(embedding_dim, n_classes)
         ])
@@ -85,15 +86,12 @@ class BaselineDNN(nn.Module):
         embeddings = self.embedding_layer(x)
 
        # 2 - construct a sentence representation out of the word embeddings
-        representation_list=[]
-        for i, length in enumerate(lengths):
-            non_padded_embeddings = embeddings[i, :length, :]
-            representation_example = non_padded_embeddings.mean(dim=0)
-            representation_list.append(representation_example)
-        
-        
-        representations=torch.stack(representation_list)
-        #print(representations)
+        representations_mean = torch.sum(embeddings, dim=1)
+        for i in range(lengths.shape[0]):
+            representations_mean[i] = representations_mean[i] / lengths[i]
+        representations_max = torch.max(embeddings, dim=1)[0]
+        representations=torch.cat((representations_mean,representations_max),dim=1)
+
         
         # 3 - transform the representations to new ones.
         for layer in self.layers[1:]:
@@ -142,10 +140,14 @@ class LSTM(nn.Module):
         # ht is batch_size x max(lengths) x hidden_dim
         ht, _ = torch.nn.utils.rnn.pad_packed_sequence(ht, batch_first=True)
 
+      
         # pick the output of the lstm corresponding to the last word
-        # TODO: Main-Lab-Q2 (Hint: take actual lengths into consideration)
-        representations = ...
-
+        representations = torch.zeros(batch_size, self.representation_size).float()
+        for i in range(lengths.shape[0]):
+            last = lengths[i] - 1 if lengths[i] <= max_length else max_length - 1
+            representations[i] = ht[i, last, :]
+       
         logits = self.linear(representations)
-
+        
         return logits
+

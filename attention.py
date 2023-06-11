@@ -48,7 +48,7 @@ class FeedFoward(nn.Module):
 
 class SimpleSelfAttentionModel(nn.Module):
 
-    def __init__(self, output_size, embeddings, max_length=60):
+    def __init__(self, output_size, embeddings, max_length=64):
         super().__init__()
 
         self.n_head = 1
@@ -69,9 +69,9 @@ class SimpleSelfAttentionModel(nn.Module):
         self.ln2 = nn.LayerNorm(dim)
 
         # TODO: Main-lab-Q3 - define output classification layer
-        self.output = ...
+        self.output = nn.Softmax(dim=-1)
 
-    def forward(self, x):
+    def forward(self, x,lengths):
         B, T = x.shape
         tok_emb = self.token_embedding_table(x)  # (B,T,C)
         pos_emb = self.position_embedding_table(torch.arange(T))  # (T,C)
@@ -80,7 +80,7 @@ class SimpleSelfAttentionModel(nn.Module):
         x = x + self.ffwd(self.ln2(x))
 
         # TODO: Main-lab-Q3 - avg pooling to get a sentence embedding
-        x = ...  # (B,C)
+        x = torch.mean(x, dim=1) # (B,C)
 
         logits = self.output(x)  # (C,output)
         return logits
@@ -104,18 +104,44 @@ class MultiHeadAttention(nn.Module):
 
 class MultiHeadAttentionModel(nn.Module):
 
-    def __init__(self, output_size, embeddings, max_length=60, n_head=3):
+    def __init__(self, output_size, embeddings, max_length=64, n_head=3):
         super().__init__()
 
         # TODO: Main-Lab-Q4 - define the model
         # Hint: it will be similar to `SimpleSelfAttentionModel` but
         # `MultiHeadAttention` will be utilized for the self-attention module here
-        ...
+        self.n_head = n_head
+        self.max_length = max_length
 
-    def forward(self, x):
-        ...
+        embeddings = np.array(embeddings)
+        num_embeddings, dim = embeddings.shape
 
-        logits = ...
+        self.token_embedding_table = nn.Embedding(num_embeddings, dim)
+        self.token_embedding_table = self.token_embedding_table.from_pretrained(
+            torch.Tensor(embeddings), freeze=True)
+        self.position_embedding_table = nn.Embedding(self.max_length, dim)
+
+        head_size = dim // self.n_head
+        self.sa = Head(head_size, dim)
+        self.ffwd = FeedFoward(dim)
+        self.ln1 = nn.LayerNorm(dim)
+        self.ln2 = nn.LayerNorm(dim)
+
+
+        self.output = nn.Softmax(dim=-1)
+
+    def forward(self, x,lengths):
+        B, T = x.shape
+        tok_emb = self.token_embedding_table(x)  # (B,T,C)
+        pos_emb = self.position_embedding_table(torch.arange(T))  # (T,C)
+        x = tok_emb + pos_emb  # (B,T,C)
+        x = x + self.sa(self.ln1(x))
+        x = x + self.ffwd(self.ln2(x))
+
+        # TODO: Main-lab-Q3 - avg pooling to get a sentence embedding
+        x = torch.mean(x, dim=1)  # (B,C)
+
+        logits = self.output(x)  # (C,output)
         return logits
 
 

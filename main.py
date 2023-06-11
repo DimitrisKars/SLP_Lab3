@@ -5,11 +5,12 @@ from sklearn.exceptions import UndefinedMetricWarning
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score, recall_score, f1_score
 import torch
-from torch.utils.data import DataLoader,TensorDataset
+from torch.utils.data import DataLoader, TensorDataset
 
 from config import EMB_PATH
 from dataloading import SentenceDataset
-from models import BaselineDNN
+from models import BaselineDNN, LSTM
+from attention import SimpleSelfAttentionModel,MultiHeadAttentionModel
 from training import train_dataset, eval_dataset
 from utils.load_datasets import load_MR, load_Semeval2017A
 from utils.load_embeddings import load_word_vectors
@@ -36,6 +37,7 @@ warnings.filterwarnings("ignore", category=UndefinedMetricWarning)
 EMBEDDINGS = os.path.join(EMB_PATH, "glove.twitter.27B.100d.txt")
 
 # 2 - set the correct dimensionality of the embeddings
+# Double in mean-max than 100
 EMB_DIM = 100
 
 EMB_TRAINABLE = False
@@ -43,7 +45,7 @@ BATCH_SIZE = 128
 EPOCHS = 3
 DATASET = "Semeval2017A"  # options: "MR", "Semeval2017A"
 
-# if your computer has a CUDA compatible gpu use it, otherwise use the cpu
+# if your computer has a CUDA compatible GPU, use it; otherwise, use the CPU
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 ########################################################
@@ -68,7 +70,7 @@ le = LabelEncoder()
 le.fit(y_train)
 y_train = le.transform(y_train)  # EX1
 y_test = le.transform(y_test)  # EX1
-n_classes = len(le.classes_) # EX1 - LabelEncoder.classes_.size
+n_classes = len(le.classes_)  # EX1 - LabelEncoder.classes_.size
 
 # Define our PyTorch-based Dataset
 train_set = SentenceDataset(X_train, y_train, word2idx)
@@ -76,15 +78,8 @@ test_set = SentenceDataset(X_test, y_test, word2idx)
 
 for i in range(5):
     print(train_set[i])
-    
-# X_train = torch.tensor(X_train)
-# y_train = torch.tensor(y_train)
-# X_test = torch.tensor(X_test)
-# y_test = torch.tensor(y_test)
 
 # EX7 - Define our PyTorch-based DataLoader
-# dataset_train = TensorDataset(X_train, y_train)
-# dataset_test = TensorDataset(X_test, y_test)
 train_loader, val_loader = torch_train_val_split(train_set, BATCH_SIZE, BATCH_SIZE)
 # train_loader = DataLoader(train_set, shuffle=True, batch_size=BATCH_SIZE)  # EX7
 test_loader = DataLoader(test_set, batch_size=BATCH_SIZE)  # EX7
@@ -92,11 +87,25 @@ test_loader = DataLoader(test_set, batch_size=BATCH_SIZE)  # EX7
 #############################################################################
 # Model Definition (Model, Loss Function, Optimizer)
 #############################################################################
-model = BaselineDNN(output_size=n_classes,  # EX8
-                    embeddings=embeddings,
-                    trainable_emb=EMB_TRAINABLE)
 
-# move the mode weight to cpu or gpu
+
+# model = BaselineDNN(output_size=n_classes,  # EX8
+#                     embeddings=embeddings,
+#                     trainable_emb=EMB_TRAINABLE)
+
+
+# model = LSTM(output_size=n_classes,
+#                    embeddings=embeddings,
+#                    trainable_emb=EMB_TRAINABLE,bidirectional=True)
+#
+
+# model = SimpleSelfAttentionModel(output_size=n_classes,
+#                                  embeddings=embeddings)
+
+model = MultiHeadAttentionModel(output_size=n_classes,
+                                 embeddings=embeddings)
+
+# Move the model to GPU
 model.to(DEVICE)
 print(model)
 
@@ -107,7 +116,11 @@ parameters = []  # EX8
 for p in model.parameters():
     if p.requires_grad:
         parameters.append(p)
-        
+
+# Move the parameters to GPU
+for i in range(len(parameters)):
+    parameters[i] = parameters[i].to(DEVICE)
+
 optimizer = optim.Adam(parameters, lr=0.0001)  # EX8
 
 #############################################################################
@@ -132,15 +145,11 @@ for epoch in range(1, EPOCHS + 1):
 
     total_train_loss.append(train_loss)
 
-    test_loss, (y_test_pred, y_test_gold) = eval_dataset(test_loader,
-                                                          model,
-                                                          criterion)
-
-    valid_loss, (y_valid_pred, y_valid_gold) = eval_dataset(test_loader,
+    valid_loss, (y_valid_pred, y_valid_gold) = eval_dataset(val_loader,
                                                             model,
                                                             criterion)
 
-    total_test_loss.append(test_loss)
+    # total_test_loss.append(test_loss)
     total_valid_loss.append(valid_loss)
 
     print(f"\n===== EPOCH {epoch} ========")
@@ -153,38 +162,10 @@ for epoch in range(1, EPOCHS + 1):
         print('Training has been completed.\n')
         break
 
-# accuracy_train = 0
-# f1_score_train = 0
-# recall_score_train = 0
-# for true, pred in zip(y_train_gold, y_train_pred):
-#     accuracy_train += accuracy_score(true, pred)
-#     f1_score_train += f1_score(true, pred, average="macro")
-#     recall_score_train += recall_score(true, pred, average="macro")
-#
-# accuracy_train /= len(y_train_gold)
-# f1_score_train /= len(y_train_gold)
-# recall_score_train /= len(y_train_gold)
-#
-# print("Accuracy score for train set:", accuracy_train)
-# print("F1-score for train set:", f1_score_train)
-# print("Recall score for train set:", recall_score_train)
-#
-# accuracy_test = 0
-# f1_score_test = 0
-# recall_score_test = 0
-# for true, pred in zip(y_test_gold, y_test_pred):
-#     accuracy_test += accuracy_score(true, pred)
-#     f1_score_test += f1_score(true, pred, average="macro")
-#     recall_score_test += recall_score(true, pred, average="macro")
-#
-# accuracy_test /= len(y_test_gold)
-# f1_score_test /= len(y_test_gold)
-# recall_score_test /= len(y_test_gold)
-#
-# print("Accuracy score for test set:", accuracy_test)
-# print("F1-score for test set:", f1_score_test)
-# print("Recall score for test set:", recall_score_test)
-
+test_loss, (y_test_pred, y_test_gold) = eval_dataset(test_loader,
+                                                     model,
+                                                     criterion)
+print(f'\nTest set\n{get_metrics_report(y_test_gold, y_test_pred)}')
 
 plt.figure()
 plt.xlabel("Epoch")
