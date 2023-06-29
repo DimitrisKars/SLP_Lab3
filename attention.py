@@ -172,17 +172,18 @@ class TransformerEncoderModel(nn.Module):
         # there are blocks of MultiHeadAttention modules as defined below
         ...
 
-        num_embeddings, dim = ...
+        num_embeddings, dim = embeddings.shape
 
         head_size = dim // self.n_head
         self.blocks = nn.Sequential(
             *[Block(n_head, head_size, dim) for _ in range(n_layer)])
         self.ln_f = nn.LayerNorm(dim)  # final layer norm
 
-        self.output = ...
+        self.output = nn.Linear(dim, output_size)
 
     def forward(self, x):
-        ...
+        x = self.blocks(x)
+        x = self.ln_f(x)
 
-        logits = ...
+        logits = self.output(x)
         return logits
