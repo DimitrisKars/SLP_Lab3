@@ -89,26 +89,36 @@ test_loader = DataLoader(test_set, batch_size=BATCH_SIZE)  # EX7
 #############################################################################
 
 models = {}
-model_epochs = {}
-models["Baseline"] = BaselineDNN(output_size=n_classes,  # EX8
-                                 embeddings=embeddings,
-                                 trainable_emb=EMB_TRAINABLE)
-
-
-models["LSTM"] = LSTM(output_size=n_classes,
-                      embeddings=embeddings,
-                      trainable_emb=EMB_TRAINABLE)
-
-models["LSTM_Bidirectional"] = LSTM(output_size=n_classes,
-                                    embeddings=embeddings,
-                                    trainable_emb=EMB_TRAINABLE, bidirectional=True)
-
-models["SimpleSelfAttention"] = SimpleSelfAttentionModel(output_size=n_classes,
-                                                         embeddings=embeddings)
+# model_epochs = {}
+# models["Baseline"] = BaselineDNN(output_size=n_classes,  # EX8
+#                                  embeddings=embeddings,
+#                                  trainable_emb=EMB_TRAINABLE)
+#
+#
+# models["LSTM"] = LSTM(output_size=n_classes,
+#                       embeddings=embeddings,
+#                       trainable_emb=EMB_TRAINABLE)
+#
+# models["LSTM_Bidirectional"] = LSTM(output_size=n_classes,
+#                                     embeddings=embeddings,
+#                                     trainable_emb=EMB_TRAINABLE, bidirectional=True)
+#
+# models["SimpleSelfAttention"] = SimpleSelfAttentionModel(output_size=n_classes,
+#                                                          embeddings=embeddings)
 
 models["MultiHead"] = MultiHeadAttentionModel(output_size=n_classes,
                                               embeddings=embeddings)
+
 models["TransformerEncoder"] = TransformerEncoderModel(output_size=n_classes, embeddings=embeddings)
+
+model_epochs = {
+    "Baseline": 50,
+    "LSTM": 20,
+    "LSTM_Bidirectional": 20,
+    "SimpleSelfAttention": 20,
+    "MultiHead": 10,
+    "TransformerEncoder": 10,
+}
 
 for m in models.keys():
     model = models[m]
@@ -141,7 +151,7 @@ for m in models.keys():
     total_train_loss = []
     total_test_loss = []
     total_valid_loss = []
-    print("Scores for", m, "model")
+    print("Scores for ", m, " model")
     for epoch in range(1, EPOCHS + 1):
         # train the model for one epoch
         train_dataset(epoch, train_loader, model, criterion, optimizer)
