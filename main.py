@@ -103,13 +103,13 @@ models = {}
 #                                     embeddings=embeddings,
 #                                     trainable_emb=EMB_TRAINABLE, bidirectional=True)
 #
-# models["SimpleSelfAttention"] = SimpleSelfAttentionModel(output_size=n_classes,
-#                                                          embeddings=embeddings)
+models["SimpleSelfAttention"] = SimpleSelfAttentionModel(output_size=n_classes,
+                                                         embeddings=embeddings)
 
 # models["MultiHead"] = MultiHeadAttentionModel(output_size=n_classes,
 #                                               embeddings=embeddings)
 
-models["TransformerEncoder"] = TransformerEncoderModel(output_size=n_classes, embeddings=embeddings)
+# models["TransformerEncoder"] = TransformerEncoderModel(output_size=n_classes, embeddings=embeddings)
 
 model_epochs = {
     "Baseline": 50,
