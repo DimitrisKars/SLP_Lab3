@@ -106,8 +106,8 @@ models = {}
 # models["SimpleSelfAttention"] = SimpleSelfAttentionModel(output_size=n_classes,
 #                                                          embeddings=embeddings)
 
-models["MultiHead"] = MultiHeadAttentionModel(output_size=n_classes,
-                                              embeddings=embeddings)
+# models["MultiHead"] = MultiHeadAttentionModel(output_size=n_classes,
+#                                               embeddings=embeddings)
 
 models["TransformerEncoder"] = TransformerEncoderModel(output_size=n_classes, embeddings=embeddings)
 

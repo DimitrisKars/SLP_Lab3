@@ -50,7 +50,7 @@ def train_dataset(_epoch, dataloader, model, loss_function, optimizer):
         optimizer.zero_grad()  # EX9
 
         # Step 2 - forward pass: y' = model(x)
-        outputs = model(inputs,lengths)  # EX9
+        outputs = model(inputs)  # EX9
 
         # Step 3 - compute loss: L = loss_function(y, y')
         loss = loss_function(outputs,labels)  # EX9
@@ -103,7 +103,7 @@ def eval_dataset(dataloader, model, loss_function):
             #model.zero_grad()  # EX9
 
             # Step 2 - forward pass: y' = model(x)
-            outputs = model(inputs,lengths)  # EX9
+            outputs = model(inputs)  # EX9
 
             # Step 3 - compute loss: L = loss_function(y, y')
             loss = loss_function(outputs,labels)  # EX9
