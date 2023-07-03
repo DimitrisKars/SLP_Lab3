@@ -69,7 +69,8 @@ class SimpleSelfAttentionModel(nn.Module):
         self.ln2 = nn.LayerNorm(dim)
 
         # TODO: Main-lab-Q3 - define output classification layer
-        self.output = nn.Softmax(dim=-1)
+        self.output = nn.Linear(dim, output_size)
+        #self.output = nn.Softmax(dim=-1)
 
     def forward(self, x):
         B, T = x.shape
