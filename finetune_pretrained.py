@@ -36,12 +36,10 @@ if __name__ == '__main__':
 
     # load the raw data
     if DATASET == "Semeval2017A":
-        X_train, y_train, X_test, y_test = load_Semeval2017A()
         pretrained_models = ['cardiffnlp/twitter-roberta-base-sentiment',
                              'mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis',
                              'Seethal/sentiment_analysis_generic_dataset']
     elif DATASET == "MR":
-        X_train, y_train, X_test, y_test = load_MR()
         pretrained_models = ['siebert/sentiment-roberta-large-english',
                              'textattack/bert-base-uncased-imdb',
                              'textattack/bert-base-uncased-yelp-polarity']
@@ -49,6 +47,10 @@ if __name__ == '__main__':
         raise ValueError("Invalid dataset")
 
     for PRETRAINED_MODEL in pretrained_models:
+        if DATASET == "Semeval2017A":
+            X_train, y_train, X_test, y_test = load_Semeval2017A()
+        else:
+            X_train, y_train, X_test, y_test = load_MR()
         # encode labels
         le = LabelEncoder()
         le.fit(list(set(y_train)))

@@ -5,13 +5,10 @@ import torch
 from utils.load_datasets import load_MR, load_Semeval2017A
 from training import get_metrics_report
 
-# DATASET = 'MR'
-# PRETRAINED_MODEL = 'siebert/sentiment-roberta-large-english'
+# DATASET = 'Semeval2017A'
+DATASET = 'MR'
 
-DATASET = 'Semeval2017A'
-# PRETRAINED_MODEL = 'cardiffnlp/twitter-roberta-base-sentiment'
-
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 LABELS_MAPPING = {
     'siebert/sentiment-roberta-large-english': {
@@ -56,15 +53,14 @@ LABELS_MAPPING = {
 if __name__ == '__main__':
     # load the raw data
     if DATASET == "Semeval2017A":
-        X_train, y_train, X_test, y_test = load_Semeval2017A()
-        pretrained_models = ['j-hartmann/sentiment-roberta-large-english-3-classes']
-        #'Seethal/sentiment_analysis_generic_dataset'
-        #'cardiffnlp/twitter-roberta-base-sentiment',
+        pretrained_models = ['cardiffnlp/twitter-roberta-base-sentiment',
+                             'Seethal/sentiment_analysis_generic_dataset',
+                             'j-hartmann/sentiment-roberta-large-english-3-classes']
+
         #'mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis',
         #'cardiffnlp/twitter-xlm-roberta-base-sentiment'
 
     elif DATASET == "MR":
-        X_train, y_train, X_test, y_test = load_MR()
         pretrained_models = ['siebert/sentiment-roberta-large-english',
                              'textattack/bert-base-uncased-imdb',
                              'textattack/bert-base-uncased-yelp-polarity']
@@ -72,6 +68,11 @@ if __name__ == '__main__':
         raise ValueError("Invalid dataset")
 
     for PRETRAINED_MODEL in pretrained_models:
+        if DATASET == 'Semeval2017A':
+            X_train, y_train, X_test, y_test = load_Semeval2017A()
+        else:
+            X_train, y_train, X_test, y_test = load_MR()
+
         # encode labels
         le = LabelEncoder()
         le.fit(list(set(y_train)))
@@ -79,10 +80,8 @@ if __name__ == '__main__':
         y_test = le.transform(y_test)
         n_classes = len(list(le.classes_))
 
-        model = AutoModelForSequenceClassification.from_pretrained(PRETRAINED_MODEL).to(DEVICE)
-        tokenizer = AutoTokenizer.from_pretrained(PRETRAINED_MODEL)
         # define a proper pipeline
-        sentiment_pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
+        sentiment_pipeline = pipeline("sentiment-analysis", model=PRETRAINED_MODEL)
 
         y_pred = []
         for x in tqdm(X_test):
