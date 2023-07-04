@@ -1,4 +1,4 @@
-from transformers import pipeline
+from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
 import torch
@@ -79,8 +79,10 @@ if __name__ == '__main__':
         y_test = le.transform(y_test)
         n_classes = len(list(le.classes_))
 
+        model = AutoModelForSequenceClassification.from_pretrained(PRETRAINED_MODEL).to(DEVICE)
+        #tokenizer = AutoTokenizer.from_pretrained(PRETRAINED_MODEL)
         # define a proper pipeline
-        sentiment_pipeline = pipeline("sentiment-analysis", model=PRETRAINED_MODEL).to(DEVICE)
+        sentiment_pipeline = pipeline("sentiment-analysis", model=model)
 
         y_pred = []
         for x in tqdm(X_test):
