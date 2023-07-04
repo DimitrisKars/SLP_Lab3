@@ -1,6 +1,7 @@
 from transformers import pipeline
 from sklearn.preprocessing import LabelEncoder
 from tqdm import tqdm
+import torch
 from utils.load_datasets import load_MR, load_Semeval2017A
 from training import get_metrics_report
 
@@ -10,6 +11,7 @@ from training import get_metrics_report
 DATASET = 'Semeval2017A'
 # PRETRAINED_MODEL = 'cardiffnlp/twitter-roberta-base-sentiment'
 
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 LABELS_MAPPING = {
     'siebert/sentiment-roberta-large-english': {
@@ -78,7 +80,7 @@ if __name__ == '__main__':
         n_classes = len(list(le.classes_))
 
         # define a proper pipeline
-        sentiment_pipeline = pipeline("sentiment-analysis", model=PRETRAINED_MODEL)
+        sentiment_pipeline = pipeline("sentiment-analysis", model=PRETRAINED_MODEL).to(DEVICE)
 
         y_pred = []
         for x in tqdm(X_test):
