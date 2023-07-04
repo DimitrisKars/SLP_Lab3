@@ -85,7 +85,7 @@ if __name__ == '__main__':
             output_dir="output",
             evaluation_strategy="epoch",
             num_train_epochs=5,
-            per_device_train_batch_size=8
+            per_device_train_batch_size=2
         )
         trainer = Trainer(
             model=model,
