@@ -80,9 +80,9 @@ if __name__ == '__main__':
         n_classes = len(list(le.classes_))
 
         model = AutoModelForSequenceClassification.from_pretrained(PRETRAINED_MODEL).to(DEVICE)
-        #tokenizer = AutoTokenizer.from_pretrained(PRETRAINED_MODEL)
+        tokenizer = AutoTokenizer.from_pretrained(PRETRAINED_MODEL)
         # define a proper pipeline
-        sentiment_pipeline = pipeline("sentiment-analysis", model=model)
+        sentiment_pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
 
         y_pred = []
         for x in tqdm(X_test):
