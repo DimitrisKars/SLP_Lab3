@@ -90,8 +90,8 @@ if __name__ == '__main__':
         trainer = Trainer(
             model=model,
             args=args,
-            train_dataset=small_train_dataset,
-            eval_dataset=small_eval_dataset,
+            train_dataset=tokenized_train_set,
+            eval_dataset=tokenized_test_set,
             compute_metrics=compute_metrics,
         )
 
