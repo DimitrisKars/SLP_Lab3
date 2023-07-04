@@ -73,11 +73,11 @@ if __name__ == '__main__':
 
         # TODO: Main-lab-Q7 - remove this section once you are ready to execute on a GPU
         #  create a smaller subset of the dataset
-        n_samples = 40
-        small_train_dataset = tokenized_train_set.shuffle(
-            seed=42).select(range(n_samples))
-        small_eval_dataset = tokenized_test_set.shuffle(
-            seed=42).select(range(n_samples))
+        # n_samples = 40
+        # small_train_dataset = tokenized_train_set.shuffle(
+        #     seed=42).select(range(n_samples))
+        # small_eval_dataset = tokenized_test_set.shuffle(
+        #     seed=42).select(range(n_samples))
 
         # TODO: Main-lab-Q7 - customize hyperparameters once you are ready to execute on a GPU
         # training setup
