@@ -40,7 +40,7 @@ if __name__ == '__main__':
                              'mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis',
                              'Seethal/sentiment_analysis_generic_dataset']
     elif DATASET == "MR":
-        pretrained_models = ['siebert/sentiment-roberta-large-english',
+        pretrained_models = [ 'siebert/sentiment-roberta-large-english',
                              'textattack/bert-base-uncased-imdb',
                              'textattack/bert-base-uncased-yelp-polarity']
     else:
@@ -85,7 +85,7 @@ if __name__ == '__main__':
             output_dir="output",
             evaluation_strategy="epoch",
             num_train_epochs=5,
-            per_device_train_batch_size=2
+            per_device_train_batch_size=4
         )
         trainer = Trainer(
             model=model,
