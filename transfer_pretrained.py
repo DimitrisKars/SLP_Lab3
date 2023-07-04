@@ -38,6 +38,16 @@ LABELS_MAPPING = {
         'LABEL_0': 'negative',
         'LABEL_1': 'neutral',
         'LABEL_2': 'positive',
+    },
+    'cardiffnlp/twitter-xlm-roberta-base-sentiment': {
+        'Positive': 'positive',
+        'Neutral': 'neutral',
+        'Negative': 'negative',
+    },
+    'j-hartmann/sentiment-roberta-large-english-3-classes': {
+        'positive': 'positive',
+        'neutral': 'neutral',
+        'negative': 'negative',
     }
 }
 
@@ -45,9 +55,12 @@ if __name__ == '__main__':
     # load the raw data
     if DATASET == "Semeval2017A":
         X_train, y_train, X_test, y_test = load_Semeval2017A()
-        pretrained_models = ['cardiffnlp/twitter-roberta-base-sentiment',
-                             'mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis',
-                             'Seethal/sentiment_analysis_generic_dataset']
+        pretrained_models = ['j-hartmann/sentiment-roberta-large-english-3-classes']
+        #'Seethal/sentiment_analysis_generic_dataset'
+        #'cardiffnlp/twitter-roberta-base-sentiment',
+        #'mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis',
+        #'cardiffnlp/twitter-xlm-roberta-base-sentiment'
+
     elif DATASET == "MR":
         X_train, y_train, X_test, y_test = load_MR()
         pretrained_models = ['siebert/sentiment-roberta-large-english',
