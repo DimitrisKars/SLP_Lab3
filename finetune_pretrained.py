@@ -40,7 +40,7 @@ if __name__ == '__main__':
                              'mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis',
                              'Seethal/sentiment_analysis_generic_dataset']
     elif DATASET == "MR":
-        pretrained_models = [ 'siebert/sentiment-roberta-large-english',
+        pretrained_models = ['siebert/sentiment-roberta-large-english',
                              'textattack/bert-base-uncased-imdb',
                              'textattack/bert-base-uncased-yelp-polarity']
     else:
@@ -73,11 +73,11 @@ if __name__ == '__main__':
 
         # TODO: Main-lab-Q7 - remove this section once you are ready to execute on a GPU
         #  create a smaller subset of the dataset
-        # n_samples = 40
-        # small_train_dataset = tokenized_train_set.shuffle(
-        #     seed=42).select(range(n_samples))
-        # small_eval_dataset = tokenized_test_set.shuffle(
-        #     seed=42).select(range(n_samples))
+        n_samples = 40
+        small_train_dataset = tokenized_train_set.shuffle(
+            seed=42).select(range(n_samples))
+        small_eval_dataset = tokenized_test_set.shuffle(
+            seed=42).select(range(n_samples))
 
         # TODO: Main-lab-Q7 - customize hyperparameters once you are ready to execute on a GPU
         # training setup
@@ -85,13 +85,13 @@ if __name__ == '__main__':
             output_dir="output",
             evaluation_strategy="epoch",
             num_train_epochs=5,
-            per_device_train_batch_size=4
+            per_device_train_batch_size=8
         )
         trainer = Trainer(
             model=model,
             args=args,
-            train_dataset=tokenized_train_set,
-            eval_dataset=tokenized_test_set,
+            train_dataset=small_train_dataset, #tokenized_train_set,
+            eval_dataset=small_eval_dataset, #tokenized_test_set,
             compute_metrics=compute_metrics,
         )
 
