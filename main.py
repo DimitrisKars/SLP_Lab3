@@ -89,9 +89,9 @@ test_loader = DataLoader(test_set, batch_size=BATCH_SIZE)  # EX7
 #############################################################################
 
 
-# model = BaselineDNN(output_size=n_classes,  # EX8
-#                     embeddings=embeddings,
-#                     trainable_emb=EMB_TRAINABLE)
+model = BaselineDNN(output_size=n_classes,  # EX8
+                    embeddings=embeddings,
+                    trainable_emb=EMB_TRAINABLE)
 
 
 # model = LSTM(output_size=n_classes,
@@ -102,8 +102,8 @@ test_loader = DataLoader(test_set, batch_size=BATCH_SIZE)  # EX7
 # model = SimpleSelfAttentionModel(output_size=n_classes,
 #                                  embeddings=embeddings)
 
-model = MultiHeadAttentionModel(output_size=n_classes,
-                                 embeddings=embeddings)
+# model = MultiHeadAttentionModel(output_size=n_classes,
+#                                  embeddings=embeddings)
 
 # Move the model to GPU
 model.to(DEVICE)
