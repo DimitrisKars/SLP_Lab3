@@ -69,68 +69,10 @@ class SimpleSelfAttentionModel(nn.Module):
         self.ln2 = nn.LayerNorm(dim)
 
         # TODO: Main-lab-Q3 - define output classification layer
-        self.output = nn.Softmax(dim=-1)
-
-    def forward(self, x,lengths):
-        B, T = x.shape
-        tok_emb = self.token_embedding_table(x)  # (B,T,C)
-        pos_emb = self.position_embedding_table(torch.arange(T))  # (T,C)
-        x = tok_emb + pos_emb  # (B,T,C)
-        x = x + self.sa(self.ln1(x))
-        x = x + self.ffwd(self.ln2(x))
-
-        # TODO: Main-lab-Q3 - avg pooling to get a sentence embedding
-        x = torch.mean(x, dim=1) # (B,C)
-
-        logits = self.output(x)  # (C,output)
-        return logits
-
-
-class MultiHeadAttention(nn.Module):
-    """ multiple heads of self-attention in parallel """
-
-    def __init__(self, num_heads, head_size, n_embd, dropout=0.0):
-        super().__init__()
-        self.heads = nn.ModuleList([Head(head_size, n_embd)
-                                    for _ in range(num_heads)])
-        self.proj = nn.Linear(n_embd, n_embd)
-        self.dropout = nn.Dropout(dropout)
+        self.output = nn.Linear(dim, output_size)
+        #self.output = nn.Softmax(dim=-1)
 
     def forward(self, x):
-        out = torch.cat([h(x) for h in self.heads], dim=-1)
-        out = self.dropout(self.proj(out))
-        return out
-
-
-class MultiHeadAttentionModel(nn.Module):
-
-    def __init__(self, output_size, embeddings, max_length=64, n_head=3):
-        super().__init__()
-
-        # TODO: Main-Lab-Q4 - define the model
-        # Hint: it will be similar to `SimpleSelfAttentionModel` but
-        # `MultiHeadAttention` will be utilized for the self-attention module here
-        self.n_head = n_head
-        self.max_length = max_length
-
-        embeddings = np.array(embeddings)
-        num_embeddings, dim = embeddings.shape
-
-        self.token_embedding_table = nn.Embedding(num_embeddings, dim)
-        self.token_embedding_table = self.token_embedding_table.from_pretrained(
-            torch.Tensor(embeddings), freeze=True)
-        self.position_embedding_table = nn.Embedding(self.max_length, dim)
-
-        head_size = dim // self.n_head
-        self.sa = Head(head_size, dim)
-        self.ffwd = FeedFoward(dim)
-        self.ln1 = nn.LayerNorm(dim)
-        self.ln2 = nn.LayerNorm(dim)
-
-
-        self.output = nn.Softmax(dim=-1)
-
-    def forward(self, x,lengths):
         B, T = x.shape
         tok_emb = self.token_embedding_table(x)  # (B,T,C)
         pos_emb = self.position_embedding_table(torch.arange(T))  # (T,C)
@@ -143,6 +85,59 @@ class MultiHeadAttentionModel(nn.Module):
 
         logits = self.output(x)  # (C,output)
         return logits
+
+
+class MultiHeadAttention(nn.Module):
+    """ multiple heads of self-attention in parallel """
+
+    def __init__(self, num_heads, head_size, n_embd, dropout=0.0):
+        super().__init__()
+        self.heads = nn.ModuleList([Head(head_size, n_embd)
+                                    for _ in range(num_heads)])
+        self.proj = nn.Linear(num_heads * head_size, n_embd)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        out = torch.cat([h(x) for h in self.heads], dim=-1)
+        out = self.dropout(self.proj(out))
+        return out
+
+
+class MultiHeadAttentionModel(nn.Module):
+
+    def __init__(self, output_size, embeddings, max_length=400, n_head=3):
+        super().__init__()
+
+        embeddings = np.array(embeddings)
+        num_embeddings, dim = embeddings.shape
+
+        self.token_embedding_table = nn.Embedding(num_embeddings, dim)
+        self.token_embedding_table = self.token_embedding_table.from_pretrained(
+            torch.Tensor(embeddings), freeze=True)
+        self.position_embedding_table = nn.Embedding(max_length, dim)
+
+        head_size = dim // n_head
+        self.sa = MultiHeadAttention(n_head, head_size, dim)
+        self.ffwd = FeedFoward(dim)
+        self.ln1 = nn.LayerNorm(dim)
+        self.ln2 = nn.LayerNorm(dim)
+
+        self.output = nn.Linear(dim, output_size)
+
+    def forward(self, x):
+        B, T = x.shape
+        tok_emb = self.token_embedding_table(x)  # (B,T,C)
+        pos_emb = self.position_embedding_table(torch.arange(T, device=x.device))  # (T,C)
+        x = tok_emb + pos_emb # (B,T,C)
+        x = x + self.sa(self.ln1(x))
+        x = x + self.ffwd(self.ln2(x))
+
+        x = torch.mean(x, dim=1)  # (B,C)
+
+        logits = self.output(x)  # (B,output)
+        return logits
+
+
 
 
 class Block(nn.Module):
@@ -164,25 +159,45 @@ class Block(nn.Module):
 
 
 class TransformerEncoderModel(nn.Module):
-    def __init__(self, output_size, embeddings, max_length=60, n_head=3, n_layer=3):
+    def __init__(self, output_size, embeddings, max_length=120, n_head=3, n_layer=3):
         super().__init__()
 
         # TODO: Main-Lab-Q5 - define the model
         # Hint: it will be similar to `MultiHeadAttentionModel` but now
         # there are blocks of MultiHeadAttention modules as defined below
-        ...
+        self.n_head = n_head
+        self.n_layer = n_layer
+        self.max_length = max_length
+        num_embeddings, dim = embeddings.shape
 
-        num_embeddings, dim = ...
+        self.token_embedding_table = nn.Embedding(num_embeddings, dim)
+        self.token_embedding_table = self.token_embedding_table.from_pretrained(
+            torch.Tensor(embeddings), freeze=True)
+        self.position_embedding_table = nn.Embedding(self.max_length, dim)
 
         head_size = dim // self.n_head
         self.blocks = nn.Sequential(
             *[Block(n_head, head_size, dim) for _ in range(n_layer)])
         self.ln_f = nn.LayerNorm(dim)  # final layer norm
 
-        self.output = ...
+        self.output = nn.Linear(dim, output_size)
 
     def forward(self, x):
-        ...
+        B, T = x.shape
+        tok_emb = self.token_embedding_table(x)  # (B,T,C)
+        pos_emb = self.position_embedding_table(torch.arange(T))  # (T,C)
+        x = tok_emb + pos_emb  # (B,T,C)
 
-        logits = ...
+        for i in range(self.n_layer):
+            x = self.blocks[i](x)
+
+        x = self.ln_f(x)
+        x = x.mean(dim=1)  # (B,C)
+
+        logits = self.output(x)  # (C,output_size)
         return logits
+        # x = self.blocks(x)
+        # x = self.ln_f(x)
+        #
+        # logits = self.output(x)
+        # return logits

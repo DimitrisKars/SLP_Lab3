@@ -50,10 +50,18 @@ def train_dataset(_epoch, dataloader, model, loss_function, optimizer):
         optimizer.zero_grad()  # EX9
 
         # Step 2 - forward pass: y' = model(x)
-        outputs = model(inputs,lengths)  # EX9
+        if model.__class__.__name__ in ['BaselineDNN', 'LSTM']:  # EX9
+            outputs = model(inputs, lengths)
+        else:
+            outputs = model(inputs)
 
         # Step 3 - compute loss: L = loss_function(y, y')
-        loss = loss_function(outputs,labels)  # EX9
+        try:
+            loss = loss_function(outputs,labels)  # EX9
+        except ValueError:
+            # fix labels for 'BCEWithLogitsLoss' loss function
+            bin_labels = torch.nn.functional.one_hot(labels.long(), num_classes=2)
+            loss = loss_function(outputs, bin_labels.float())
 
         # Step 4 - backward pass: compute gradient wrt model parameters
         loss.backward()  # EX9
@@ -103,7 +111,11 @@ def eval_dataset(dataloader, model, loss_function):
             #model.zero_grad()  # EX9
 
             # Step 2 - forward pass: y' = model(x)
-            outputs = model(inputs,lengths)  # EX9
+            if model.__class__.__name__ in ['BaselineDNN', 'LSTM']:  # EX9
+                outputs = model(inputs, lengths)
+            else:
+                outputs = model(inputs)
+            #outputs = model(inputs)
 
             # Step 3 - compute loss: L = loss_function(y, y')
             loss = loss_function(outputs,labels)  # EX9
