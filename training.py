@@ -161,8 +161,8 @@ def torch_train_val_split(
 
 def get_metrics_report(y, y_hat):
     # Convert values to lists
-    y = np.concatenate(y, axis=0)
-    y_hat = np.concatenate(y_hat, axis=0)
+    y = np.concatenate([y_i.cpu() for y_i in y], axis=0)
+    y_hat = np.concatenate([y_hat_i.cpu() for y_hat_i in y_hat], axis=0)
     # report metrics
     report = f' accuracy: {accuracy_score(y, y_hat)}\n  recall: ' + \
         f'{recall_score(y, y_hat, average="macro")}\n  f1-score: {f1_score(y, y_hat,average="macro")}'

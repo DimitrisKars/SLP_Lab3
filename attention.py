@@ -75,7 +75,7 @@ class SimpleSelfAttentionModel(nn.Module):
     def forward(self, x):
         B, T = x.shape
         tok_emb = self.token_embedding_table(x)  # (B,T,C)
-        pos_emb = self.position_embedding_table(torch.arange(T))  # (T,C)
+        pos_emb = self.position_embedding_table(torch.arange(T).to(DEVICE))  # (T,C)
         x = tok_emb + pos_emb  # (B,T,C)
         x = x + self.sa(self.ln1(x))
         x = x + self.ffwd(self.ln2(x))
