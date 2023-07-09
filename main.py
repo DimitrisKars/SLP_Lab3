@@ -117,7 +117,7 @@ model_epochs = {
     "LSTM_Bidirectional": 20,
     "SimpleSelfAttention": 20,
     "MultiHead": 20,
-    "TransformerEncoder": 10,
+    "TransformerEncoder": 20,
 }
 
 for m in models.keys():
