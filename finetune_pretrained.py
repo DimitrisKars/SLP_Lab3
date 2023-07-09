@@ -20,7 +20,10 @@ def compute_metrics(eval_pred):
 
 
 def tokenize_function(examples):
-    return tokenizer(examples["text"], padding="max_length", truncation=True)
+    if(DATASET=='Semeval2017A'):
+        return tokenizer(examples["text"], padding="max_length" ,max_length = 512, truncation=True)
+    else:
+        return tokenizer(examples["text"], padding="max_length", truncation=True)
 
 
 def prepare_dataset(X, y):
