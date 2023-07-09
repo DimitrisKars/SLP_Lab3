@@ -48,7 +48,7 @@ class FeedFoward(nn.Module):
 
 class SimpleSelfAttentionModel(nn.Module):
 
-    def __init__(self, output_size, embeddings, max_length=64):
+    def __init__(self, output_size, embeddings, max_length=120):
         super().__init__()
 
         self.n_head = 1
@@ -105,7 +105,7 @@ class MultiHeadAttention(nn.Module):
 
 class MultiHeadAttentionModel(nn.Module):
 
-    def __init__(self, output_size, embeddings, max_length=400, n_head=3):
+    def __init__(self, output_size, embeddings, max_length=120, n_head=3):
         super().__init__()
 
         embeddings = np.array(embeddings)

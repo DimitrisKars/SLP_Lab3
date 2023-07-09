@@ -90,9 +90,9 @@ test_loader = DataLoader(test_set, batch_size=BATCH_SIZE)  # EX7
 
 models = {}
 # model_epochs = {}
-models["BaselineDNN"] = BaselineDNN(output_size=n_classes,  # EX8
-                                    embeddings=embeddings,
-                                    trainable_emb=EMB_TRAINABLE)
+# models["BaselineDNN"] = BaselineDNN(output_size=n_classes,  # EX8
+#                                     embeddings=embeddings,
+#                                     trainable_emb=EMB_TRAINABLE)
 #
 #
 # models["LSTM"] = LSTM(output_size=n_classes,
@@ -106,8 +106,8 @@ models["BaselineDNN"] = BaselineDNN(output_size=n_classes,  # EX8
 # models["SimpleSelfAttention"] = SimpleSelfAttentionModel(output_size=n_classes,
 #                                                          embeddings=embeddings)
 
-# models["MultiHead"] = MultiHeadAttentionModel(output_size=n_classes,
-#                                               embeddings=embeddings)
+models["MultiHead"] = MultiHeadAttentionModel(output_size=n_classes,
+                                              embeddings=embeddings)
 
 # models["TransformerEncoder"] = TransformerEncoderModel(output_size=n_classes, embeddings=embeddings)
 
@@ -116,7 +116,7 @@ model_epochs = {
     "LSTM": 20,
     "LSTM_Bidirectional": 20,
     "SimpleSelfAttention": 20,
-    "MultiHead": 10,
+    "MultiHead": 20,
     "TransformerEncoder": 10,
 }
 
