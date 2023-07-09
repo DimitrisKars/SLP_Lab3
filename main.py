@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from config import EMB_PATH
 from dataloading import SentenceDataset
-from models import BaselineDNN, LSTM
+from models import PrepLabBaselineDNN, BaselineDNN, LSTM
 from attention import SimpleSelfAttentionModel, MultiHeadAttentionModel, TransformerEncoderModel
 from training import train_dataset, eval_dataset
 from utils.load_datasets import load_MR, load_Semeval2017A
@@ -43,7 +43,7 @@ EMB_DIM = 100
 EMB_TRAINABLE = False
 BATCH_SIZE = 128
 # EPOCHS = 3
-DATASET = "Semeval2017A"  # options: "MR", "Semeval2017A"
+DATASET = "MR"  # options: "MR", "Semeval2017A"
 
 # if your computer has a CUDA compatible GPU, use it; otherwise, use the CPU
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -90,28 +90,35 @@ test_loader = DataLoader(test_set, batch_size=BATCH_SIZE)  # EX7
 
 models = {}
 # model_epochs = {}
-# models["BaselineDNN"] = BaselineDNN(output_size=n_classes,  # EX8
-#                                     embeddings=embeddings,
-#                                     trainable_emb=EMB_TRAINABLE)
-#
-#
-# models["LSTM"] = LSTM(output_size=n_classes,
-#                       embeddings=embeddings,
-#                       trainable_emb=EMB_TRAINABLE)
-#
-# models["LSTM_Bidirectional"] = LSTM(output_size=n_classes,
-#                                     embeddings=embeddings,
-#                                     trainable_emb=EMB_TRAINABLE, bidirectional=True)
-#
-# models["SimpleSelfAttention"] = SimpleSelfAttentionModel(output_size=n_classes,
-#                                                          embeddings=embeddings)
+
+models["PrepLabBaselineDNN"] = PrepLabBaselineDNN(output_size=n_classes,  # EX8
+                                                  embeddings=embeddings,
+                                                  trainable_emb=EMB_TRAINABLE)
+
+
+models["BaselineDNN"] = BaselineDNN(output_size=n_classes,  # EX8
+                                    embeddings=embeddings,
+                                    trainable_emb=EMB_TRAINABLE)
+
+
+models["LSTM"] = LSTM(output_size=n_classes,
+                      embeddings=embeddings,
+                      trainable_emb=EMB_TRAINABLE)
+
+models["LSTM_Bidirectional"] = LSTM(output_size=n_classes,
+                                    embeddings=embeddings,
+                                    trainable_emb=EMB_TRAINABLE, bidirectional=True)
+
+models["SimpleSelfAttention"] = SimpleSelfAttentionModel(output_size=n_classes,
+                                                         embeddings=embeddings)
 
 models["MultiHead"] = MultiHeadAttentionModel(output_size=n_classes,
                                               embeddings=embeddings)
 
-# models["TransformerEncoder"] = TransformerEncoderModel(output_size=n_classes, embeddings=embeddings)
+models["TransformerEncoder"] = TransformerEncoderModel(output_size=n_classes, embeddings=embeddings)
 
 model_epochs = {
+    "PrepLabBaselineDNN": 50,
     "BaselineDNN": 40,
     "LSTM": 20,
     "LSTM_Bidirectional": 20,
@@ -194,5 +201,5 @@ for m in models.keys():
     plt.figure()
     plt.xlabel("Epoch")
     plt.title("Test loss")
-    plt.plot(total_test_loss)
+    plt.plot(total_valid_loss)
     plt.savefig("test_loss.svg", format='svg')

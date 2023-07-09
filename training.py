@@ -50,7 +50,7 @@ def train_dataset(_epoch, dataloader, model, loss_function, optimizer):
         optimizer.zero_grad()  # EX9
 
         # Step 2 - forward pass: y' = model(x)
-        if model.__class__.__name__ in ['BaselineDNN', 'LSTM']:  # EX9
+        if model.__class__.__name__ in ['PrepLabBaselineDNN','BaselineDNN', 'LSTM']:  # EX9
             outputs = model(inputs, lengths)
         else:
             outputs = model(inputs)
@@ -111,7 +111,7 @@ def eval_dataset(dataloader, model, loss_function):
             #model.zero_grad()  # EX9
 
             # Step 2 - forward pass: y' = model(x)
-            if model.__class__.__name__ in ['BaselineDNN', 'LSTM']:  # EX9
+            if model.__class__.__name__ in ['PrepLabBaselineDNN', 'BaselineDNN', 'LSTM']:  # EX9
                 outputs = model(inputs, lengths)
             else:
                 outputs = model(inputs)

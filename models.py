@@ -5,9 +5,10 @@ from torch import nn
 # from __main__ import vocab_size, EMB_DIM, n_classes
 #Double in mean-max pooling than 100
 EMB_DIM = 100
-n_classes = 3
+n_classes = 3  # or 2
 
-class BaselineDNN(nn.Module):
+
+class PrepLabBaselineDNN(nn.Module):
     """
     1. We embed the words in the input texts using an embedding layer
     2. We compute the min, mean, max of the word embeddings in each sample
@@ -17,7 +18,7 @@ class BaselineDNN(nn.Module):
     """
 
     def __init__(self, output_size, embeddings, trainable_emb=False):
-        super(BaselineDNN, self).__init__()
+        super(PrepLabBaselineDNN, self).__init__()
 
         # EX4
         # 1 - define the embedding layer
@@ -26,9 +27,6 @@ class BaselineDNN(nn.Module):
         self.embeddings = nn.Embedding(num_embeddings, dim)
         self.output_size = output_size
 
-        # 2 - initialize the weights of our Embedding layer
-        # from the pretrained word embeddings
-        # 3 - define if the embedding layer will be frozen or finetuned
         if not trainable_emb:
             self.embeddings = self.embeddings.from_pretrained(torch.Tensor(embeddings), freeze=True)
 
@@ -42,6 +40,47 @@ class BaselineDNN(nn.Module):
         # EX5
         self.output = nn.Linear(1000, output_size)
 
+    def forward(self, x, lengths):
+        """
+        This is the heart of the model.
+        This function, defines how the data passes through the network.
+
+        Returns: the logits for each class
+
+        """
+
+        # 1 - embed the words, using the embedding layer
+        # EX6
+        embeddings = self.embeddings(x)
+
+        # 2 - construct a sentence representation out of the word embeddings
+        # EX6
+        # calculate the means
+        representations = torch.sum(embeddings, dim=1)
+        for i in range(lengths.shape[0]):  # necessary to skip zeros in mean calculation
+            representations[i] = representations[i] / lengths[i]
+
+        # 3 - transform the representations to new ones.
+        # EX6
+        representations = self.relu(self.linear(representations))
+
+        # 4 - project the representations to classes using a linear layer
+        # EX6
+        logits = self.output(representations)
+
+        return logits
+
+class BaselineDNN(nn.Module):
+    """
+    1. We embed the words in the input texts using an embedding layer
+    2. We compute the min, mean, max of the word embeddings in each sample
+       and use it as the feature representation of the sequence.
+    4. We project with a linear layer the representation
+       to the number of classes.ngth)
+    """
+
+    def __init__(self, output_size, embeddings, trainable_emb=False):
+        super(BaselineDNN, self).__init__()
         """
 
         Args:
@@ -51,8 +90,6 @@ class BaselineDNN(nn.Module):
                 the embedding layer
         """
 
-        """
-        Our code
         super(BaselineDNN, self).__init__()
         self.output_size = output_size
         self.embeddings = embeddings
@@ -100,7 +137,7 @@ class BaselineDNN(nn.Module):
         # 5 - define the final Linear layer which maps
         # the representations to the classes
         # EX5
-        """
+
 
     def forward(self, x, lengths):
         """
@@ -110,47 +147,23 @@ class BaselineDNN(nn.Module):
         Returns: the logits for each class
         """
 
-        """
-         Our code
-         # 1 - embed the words, using the embedding layer
-         embeddings = self.embedding_layer(x)
-
-        # 2 - construct a sentence representation out of the word embeddings
-         representations_mean = torch.sum(embeddings, dim=1)
-         for i in range(lengths.shape[0]):
-             representations_mean[i] = representations_mean[i] / lengths[i]
-         representations_max = torch.max(embeddings, dim=1)[0]
-         representations=torch.cat((representations_mean,representations_max),dim=1)
-
-
-         # 3 - transform the representations to new ones.
-         for layer in self.layers[1:]:
-             representations = layer(representations)
-
-         # 4 - project the representations to classes using a linear layer
-         logits = representations
-
-         return logits
-         """
-
         # 1 - embed the words, using the embedding layer
-        # EX6
-        embeddings = self.embeddings(x)
+        embeddings = self.embedding_layer(x)
 
         # 2 - construct a sentence representation out of the word embeddings
-        # EX6
-        # calculate the means
-        representations = torch.sum(embeddings, dim=1)
-        for i in range(lengths.shape[0]):  # necessary to skip zeros in mean calculation
-            representations[i] = representations[i] / lengths[i]
+        representations_mean = torch.sum(embeddings, dim=1)
+        for i in range(lengths.shape[0]):
+            representations_mean[i] = representations_mean[i] / lengths[i]
+        representations_max = torch.max(embeddings, dim=1)[0]
+        representations=torch.cat((representations_mean,representations_max),dim=1)
+
 
         # 3 - transform the representations to new ones.
-        # EX6
-        representations = self.relu(self.linear(representations))
+        for layer in self.layers[1:]:
+            representations = layer(representations)
 
         # 4 - project the representations to classes using a linear layer
-        # EX6
-        logits = self.output(representations)
+        logits = representations
 
         return logits
 
